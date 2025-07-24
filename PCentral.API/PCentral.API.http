@@ -1,6 +1,0 @@
-@PCentral.API_HostAddress = http://localhost:5083
-
-GET {{PCentral.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
