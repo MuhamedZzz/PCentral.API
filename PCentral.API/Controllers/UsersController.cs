@@ -27,6 +27,8 @@ namespace PCentral.API.Controllers
 
             return Ok(new
             {
+                Id = user.Id,
+                Username = user.UserName,
                 Email = user.Email,
                 Bio = user.Bio,
                 AvatarUrl = user.AvatarUrl
@@ -38,16 +40,36 @@ namespace PCentral.API.Controllers
         {
             var id = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _users.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
+            if (user == null)
+                return NotFound();
 
+            // 1) If they passed a new username, attempt to change it
+            if (!string.IsNullOrWhiteSpace(dto.Username) && dto.Username != user.UserName)
+            {
+                // This will check uniqueness, update normalized name, etc.
+                var usernameResult = await _users.SetUserNameAsync(user, dto.Username);
+                if (!usernameResult.Succeeded)
+                    // return all Identity errors (e.g. duplicate username)
+                    return BadRequest(usernameResult.Errors);
+            }
+
+            // 2) Update the rest of their profile
             user.Bio = dto.Bio;
             user.AvatarUrl = dto.AvatarUrl;
 
-            var result = await _users.UpdateAsync(user);
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            var updateResult = await _users.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+                return BadRequest(updateResult.Errors);
 
-            return NoContent();
+            // 3) (optional) return the updated resource
+            return Ok(new
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Email = user.Email,
+                Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl
+            });
         }
     }
 }

@@ -24,21 +24,57 @@ namespace PCentral.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var user = new User { UserName = dto.Email, Email = dto.Email };
-            var res = await _users.CreateAsync(user, dto.Password);
-            if (!res.Succeeded) return BadRequest(res.Errors);
+            var user = new User
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                Bio = null,
+                AvatarUrl = null
+            };
+
+            var createResult = await _users.CreateAsync(user, dto.Password);
+            if (!createResult.Succeeded)
+                return BadRequest(createResult.Errors);
+
             var token = _jwt.GenerateToken(user);
-            return Ok(new { token });
+            var response = new AuthResponseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName!,
+                Email = user.Email!,
+                Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl,
+                Token = token
+            };
+
+            return Ok(response);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var res = await _signIn.PasswordSignInAsync(dto.Email, dto.Password, false, false);
-            if (!res.Succeeded) return Unauthorized();
+            // First, get the user by email to get their username
             var user = await _users.FindByEmailAsync(dto.Email);
-            var token = _jwt.GenerateToken(user!);
-            return Ok(new { token });
+            if (user == null)
+                return Unauthorized("Invalid email or password.");
+
+            // Use the username for sign-in (since UserName = Email in your case, this is the same)
+            var signInResult = await _signIn.PasswordSignInAsync(user.UserName!, dto.Password, false, false);
+            if (!signInResult.Succeeded)
+                return Unauthorized("Invalid email or password.");
+
+            var token = _jwt.GenerateToken(user);
+            var response = new AuthResponseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName!,
+                Email = user.Email!,
+                Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl,
+                Token = token
+            };
+
+            return Ok(response);
         }
     }
 }
