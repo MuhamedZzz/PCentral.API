@@ -42,7 +42,7 @@ namespace PCentral.API.Services
                     try
                     {
                         var fileName = Path.GetFileNameWithoutExtension(filePath);
-                        var category = fileName.Replace("-", "").ToLower(); // Normalize category name
+                        var category = fileName.Replace("-", "").ToLower();
 
                         var jsonContent = File.ReadAllText(filePath);
                         var jsonElements = JsonSerializer.Deserialize<JsonElement[]>(jsonContent);
@@ -54,12 +54,11 @@ namespace PCentral.API.Services
                             var element = jsonElements[i];
                             var part = new StaticPart
                             {
-                                Id = $"{category}_{i + 1}", // Generate unique ID
+                                Id = $"{category}_{i + 1}",
                                 Category = category,
                                 Properties = new Dictionary<string, object>()
                             };
 
-                            // Extract name and price if they exist
                             if (element.TryGetProperty("name", out var nameElement))
                             {
                                 part.Name = nameElement.GetString() ?? "";
@@ -73,7 +72,6 @@ namespace PCentral.API.Services
                                 }
                             }
 
-                            // Add all properties to the Properties dictionary
                             foreach (var property in element.EnumerateObject())
                             {
                                 part.Properties[property.Name] = ConvertJsonElement(property.Value);

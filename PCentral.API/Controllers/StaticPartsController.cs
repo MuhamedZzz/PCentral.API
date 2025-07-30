@@ -19,9 +19,6 @@ namespace PCentral.API.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get all available categories
-        /// </summary>
         [HttpGet("categories")]
         public IActionResult GetCategories()
         {
@@ -29,9 +26,6 @@ namespace PCentral.API.Controllers
             return Ok(categories);
         }
 
-        /// <summary>
-        /// Get all parts in a specific category
-        /// </summary>
         [HttpGet("{category}")]
         public IActionResult GetByCategory(string category)
         {
@@ -60,9 +54,6 @@ namespace PCentral.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Get a specific part by category and ID
-        /// </summary>
         [HttpGet("{category}/{id}")]
         public IActionResult GetById(string category, string id)
         {

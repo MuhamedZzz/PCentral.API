@@ -53,12 +53,10 @@ namespace PCentral.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            // First, get the user by email to get their username
             var user = await _users.FindByEmailAsync(dto.Email);
             if (user == null)
                 return Unauthorized("Invalid email or password.");
 
-            // Use the username for sign-in (since UserName = Email in your case, this is the same)
             var signInResult = await _signIn.PasswordSignInAsync(user.UserName!, dto.Password, false, false);
             if (!signInResult.Succeeded)
                 return Unauthorized("Invalid email or password.");

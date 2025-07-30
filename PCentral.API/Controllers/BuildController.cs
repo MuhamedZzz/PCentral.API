@@ -21,7 +21,6 @@ namespace PCentral.API.Controllers
             _db = db;
         }
 
-        // GET /api/build
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -31,20 +30,17 @@ namespace PCentral.API.Controllers
             if (build == null)
                 return NotFound();
 
-            // Deserialize JSON back into a List<string>
             var parts = JsonSerializer.Deserialize<List<string>>(build.PartsJson)
                         ?? new List<string>();
 
             return Ok(new BuildDto { Parts = parts });
         }
 
-        // POST /api/build
         [HttpPost]
         public async Task<IActionResult> Save([FromBody] BuildDto dto)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            // Serialize the List<string> to JSON
             var json = JsonSerializer.Serialize(dto.Parts);
 
             var existing = await _db.Builds.FirstOrDefaultAsync(b => b.UserId == userId);
@@ -66,7 +62,6 @@ namespace PCentral.API.Controllers
             return NoContent();
         }
 
-        // DELETE /api/build
         [HttpDelete]
         public async Task<IActionResult> Delete()
         {

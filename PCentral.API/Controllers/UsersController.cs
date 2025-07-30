@@ -43,17 +43,13 @@ namespace PCentral.API.Controllers
             if (user == null)
                 return NotFound();
 
-            // 1) If they passed a new username, attempt to change it
             if (!string.IsNullOrWhiteSpace(dto.Username) && dto.Username != user.UserName)
             {
-                // This will check uniqueness, update normalized name, etc.
                 var usernameResult = await _users.SetUserNameAsync(user, dto.Username);
                 if (!usernameResult.Succeeded)
-                    // return all Identity errors (e.g. duplicate username)
                     return BadRequest(usernameResult.Errors);
             }
 
-            // 2) Update the rest of their profile
             user.Bio = dto.Bio;
             user.AvatarUrl = dto.AvatarUrl;
 
@@ -61,7 +57,6 @@ namespace PCentral.API.Controllers
             if (!updateResult.Succeeded)
                 return BadRequest(updateResult.Errors);
 
-            // 3) (optional) return the updated resource
             return Ok(new
             {
                 Id = user.Id,
